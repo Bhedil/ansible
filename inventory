@@ -1,5 +1,6 @@
 [web_servers]
 172.31.14.83
+ec2-user@172.31.6.78
 
 [db_servers]
 ec2-user@172.31.6.78

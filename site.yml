@@ -17,95 +17,18 @@
       update_cache: yes
     when: ansible_distribution == "Ubuntu"
 
-  - name: create user
-    tags: always
-    ansible.builtin.user:
-      name: bhedil
-      groups: root
-
-  - name: add sudoers file for bhedil
-    tags: always
-    ansible.builtin.copy:
-      src: sudoer_bhedil
-      dest: /etc/sudoers.d/bhedil
-      owner: root
-      group: root
-      mode: 0440
-
-  - name: add ssh key for bhedil user
-    tags: always
-    ansible.builtin.authorized_key:
-      user: bhedil
-      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkoqWeVVTwFykni3R4XiYHMkQ4hl0RNltaYR3krGG0s ubuntu@ip-172-31-11-39"
-
-- hosts: web_servers
+- hosts: all
   become: true
-  tasks:
-
-  - name: install apache on web servers (ubuntu)
-    tags: apache,ubuntu
-    ansible.builtin.apt:
-      name:
-        - apache2
-        - libapache2-mod-php
-    when: ansible_distribution == "Ubuntu"
-
-  - name: install apache on web servers (redhat)
-    tags: apache,fedora
-    ansible.builtin.dnf:
-      name:
-        - httpd
-    when: ansible_distribution == "RedHat"
-
-  - name: ensure apache is running (ubuntu)
-    tags: apache,ubuntu
-    ansible.builtin.service:
-      name: apache2
-      state: started
-    when: ansible_distribution == "Ubuntu"
-
-  - name: ensure apache is running (redhat)
-    tags: apache,redhat
-    ansible.builtin.service:
-      name: httpd
-      state: started
-    when: ansible_distribution == "RedHat"
-
-  - name: change email address for admin
-    tags: apache,redhat
-    ansible.builtin.lineinfile:
-      path: /etc/httpd/conf/httpd.conf
-      regexp: '^ServerAdmin'
-      line: ServerAdmin somebody@somewhere.net
-    when: ansible_distribution == "RedHat"
-    register: httpd
-
-  - name: restart httpd (redhat)
-    tags: apache,fedora
-    ansible.builtin.service:
-      name: httpd
-      state: restarted
-    when: httpd.changed
-
-  - name: copy html file for site
-    tags: apache,ubuntu
-    ansible.builtin.copy:
-      src: default_site.html
-      dest: /var/www/html/index.html
-      owner: root
-      group: root
-      mode: 0644
+  roles:
+    - base
 
 - hosts: db_servers
   become: true
-  tasks:
+  roles:
+    - db_servers
 
-  - name: install mariadb package on web servers
-    tags: db,redhat
-    ansible.builtin.dnf:
-      name:
-        - mariadb
-      state: latest
-    when: ansible_distribution == "RedHat"
-
+- hosts: web_servers
+  become: true
+  roles:
+    - web_servers
 

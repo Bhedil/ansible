@@ -1,0 +1,20 @@
+- name: create user
+  tags: always
+  ansible.builtin.user:
+    name: bhedil
+    groups: root
+
+- name: add sudoers file for bhedil
+  tags: always
+  ansible.builtin.copy:
+    src: sudoer_bhedil
+    dest: /etc/sudoers.d/bhedil
+    owner: root
+    group: root
+    mode: 0440
+
+- name: add ssh key for bhedil user
+  tags: always
+  ansible.builtin.authorized_key:
+    user: bhedil
+    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkoqWeVVTwFykni3R4XiYHMkQ4hl0RNltaYR3krGG0s ubuntu@ip-172-31-11-39"

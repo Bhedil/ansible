@@ -18,3 +18,12 @@
   ansible.builtin.authorized_key:
     user: bhedil
     key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINkoqWeVVTwFykni3R4XiYHMkQ4hl0RNltaYR3krGG0s ubuntu@ip-172-31-11-39"
+
+- name: configure openssh based on template
+  ansible.builtin.template:
+    src: "{{ ssh_template_file }}"
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart_sshd

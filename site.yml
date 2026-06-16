@@ -1,0 +1,44 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates for RedHat
+    tags: always
+    ansible.builtin.dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "RedHat"
+
+  - name: install updates for Ubuntu
+    tags: always
+    ansible.builtin.apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+  - name: install apache on web servers
+    tags: apache,ubuntu
+    ansible.builtin.apt:
+      name:
+        - apache2
+        - libapache2-mod-php
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: db_servers
+  become: true
+  tasks:
+
+  - name: install mariadb package on web servers
+    tags: db,redhat
+    ansible.builtin.dnf:
+      name:
+        - mariadb
+      state: latest
+    when: ansible_distribution == "RedHat"
+
+

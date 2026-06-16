@@ -1,46 +1,23 @@
-- name: install apache on web servers (ubuntu)
-  tags: apache,ubuntu
-  ansible.builtin.apt:
+- name: install apache on web servers
+  tags: apache
+  ansible.builtin.package:
     name:
-      - apache2
-      - libapache2-mod-php
-  when: ansible_distribution == "Ubuntu"
+      - "{{ apache_package }}"
 
-- name: install apache on web servers (redhat)
-  tags: apache,redhat
-  ansible.builtin.dnf:
-    name: httpd
-  when: ansible_distribution == "RedHat"
-
-- name: ensure apache is running (ubuntu)
-  tags: apache,ubuntu
+- name: ensure apache is running
+  tags: apache
   ansible.builtin.service:
-    name: apache2
+    name: "{{ apache_service }}"
     state: started
-  when: ansible_distribution == "Ubuntu"
-
-- name: ensure apache is running (redhat)
-  tags: apache,redhat
-  ansible.builtin.service:
-    name: httpd
-    state: started
-  when: ansible_distribution == "RedHat"
 
 - name: change email address for admin
   tags: apache,redhat
   ansible.builtin.lineinfile:
     path: /etc/httpd/conf/httpd.conf
     regexp: '^ServerAdmin'
-    line: ServerAdmin somebody@somewhere.net
+    line: ServerAdmin somebody@somewhere.com
   when: ansible_distribution == "RedHat"
-  register: httpd
-
-- name: restart httpd (redhat)
-  tags: apache,fedora
-  ansible.builtin.service:
-    name: httpd
-    state: restarted
-  when: httpd.changed
+  notify: restart_apache
 
 - name: copy html file for site
   tags: apache,ubuntu
